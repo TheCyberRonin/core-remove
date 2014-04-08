@@ -1,6 +1,8 @@
 /*********************************************************************************
  * Ruben Swyers                                                                  *
- * Recursively deletes any cores in a directory, it will go into subdirectories	 *
+ * Accepts a file or directory as a command line argument					     *
+ * it will search throught it and list directories							     *
+ * and cores in them along with some information about them.					 *
  *********************************************************************************
  */
 #include <unistd.h>
@@ -13,113 +15,87 @@
 
 //Prototypes
 //Prints out the contents of a directory(including subdirectories) It's recursive
-void list_dir(char * name);
-//Helper functions for list_dir
-//checks to see if an entry is a file (returns 1 if it is, 0 if it isn't)
-int checkFile(struct dirent * entry);
-//checks to see if an entry is a directory(returns 1 if it is, 0 if it isn't)
-int checkDir(struct dirent * entry);
+void list_dir(char * name,int level);
 
 int main(int argc, char *argv[])
 {
 	//Usage clause:
-	//Expecting one command line argument, either a file name or a directory name
+	//Expecting one command line argument, a directory name
 	if(argc != 2)
 	{
-		printf("usage: %s <filename>\n",argv[0]);
+		printf("usage: %s <directory>\n",argv[0]);
 	}
-	
+
 	//variables
 	struct stat statS;
-
+    //recursively searches for a core file, prints its location and removes it
 	stat(argv[1],&statS);
-	if(S_ISREG(statS.st_mode))
+	if(S_ISDIR(statS.st_mode))
 	{
-		printf("usage: <%s> <directory> or <%s>", argv[0], argv[0]);
-	}
-	else if(S_ISDIR(statS.st_mode))
-	{
-		list_dir(argv[1]);
+        //recursively gets and prints the information out of the contents of the directory that have the name of core
+		list_dir(argv[1],0);
 	}
 	else
 	{
-		printf("The command line argument was not a file or directory\n");
+		printf("The command line argument was not a directory\n");
 	}
-
+	printf("\n");
 	return 0;
 }
 //Name: list_dir
-//Parameters: name of the directory
-//Description: prints out the contents of a directory recursively
-void list_dir(char * name)
+//Parameters: name of the directory and the level (int)
+//Description: prints out the contents of a directory recursively that is removed(core files)
+void list_dir(char * name, int level)
 {
     DIR *dir;
     struct dirent *entry;
-    int sentinel = 1;
+    struct stat statS;
+    int offset = level*2;
+    int error;
+    int flag = 0;
     //Opens the directory
     if (!(dir = opendir(name)))
     {
         return;
     }
-    //Processes each thing in the directory, if its a file, it prints out the data, if its a directory
+    //make the current directory the one that is passed
+    chdir(name);
+    //if its a directory
     //it calls list_dir for that directory
-    while(entry = readdir(dir))
+    while((entry = readdir(dir)) !=NULL)
     {
-        if(checkDir(entry) == 1)
+      	if(lstat(entry->d_name,&statS)==-1)
+		{
+	  	perror("Stat");
+		}
+        //checks to see if the entry is a directory
+        if(S_ISDIR(statS.st_mode))
         {
-        	//Actively updates the path by concatenating the old path with the name
-            char path[1024];
-            int len = snprintf(path, sizeof(path)-1, "%s/%s", name, entry->d_name);
-            path[len] = 0;
+        	//skips over "." and ".."
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             {
                 continue;
             }
-            printf("%s\n",entry->d_name);
-            list_dir(path);
+            printf("%*s%s/\n",offset,"",entry->d_name);
+            list_dir(entry->d_name,level+1);
         }
-        else if(checkFile(entry) == 1)
-        {
-            if(strcmp("core",entry->d_name)==0)
-            {
-            	printf("Removed %s", entry->d_name);
-            	remove(entry->d_name);
-            }
+        //if it's not a directory its a file,looks to see if it is a core file, prints the location and removes it
+        else
+        {	
+        	if(strcmp("core",entry->d_name) == 0)
+        	{
+        		printf("%*sremoved: %s%20d bytes\n",offset,"",entry->d_name,(int)statS.st_size);
+        		unlink(entry->d_name);
+        		flag = 1;
+        	}
+            
         }
     }
+    if(flag == 0)
+    {
+    	printf("%*sNo cores found in this directory\n",offset,"");
+    }
+    //change the directory back to its parent
+    chdir("..");
     closedir(dir);
-}
-//Name: checkDir
-//Parameters: a pointer ot a dirent (has information about an entry in a DIR)
-//Description: checks to see if an entry is a directory or not
-//Return: 1 if a directory, 0 if not
-int checkDir(struct dirent * entry)
-{
-    struct stat statS;
-    stat(entry->d_name,&statS);
-    if(S_ISDIR(statS.st_mode))
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-//Name: checkFile
-//Parameters: a pointer to a dirent (has information about an entry in a DIR)
-//Description: checks to see if an entry is a regular file or not
-//Return: 1 if regular file, 0 if not
-int checkFile(struct dirent * entry)
-{
-    struct stat statS;
-    stat(entry->d_name,&statS);
-    if(S_ISREG(statS.st_mode))
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
 }
