@@ -1,6 +1,6 @@
 /*********************************************************************************
  * Ruben Swyers                                                                  *
- * Accepts a file or directory as a command line argument					     *
+ * Accepts a directory as a command line argument					     *
  * it will search throught it and list directories							     *
  * and cores in them along with some information about them.					 *
  *********************************************************************************
