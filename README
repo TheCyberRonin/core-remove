@@ -1,9 +1,10 @@
 Created by Ruben Swyers:
 Description
 C program that will recursively delete cores in a directory that is given as a command line argument.
-This would be helpful for any programmer that has the occasional core dumps that forgets to remove them.
+This would be helpful for any programmer that has the occasional core dump that forgets to remove them.
 
 *This program was only tested on Linux and should only be used on Linux.
+*May be useful to set as a cron job to be executed once a week or so
 
 Directions
 You will have to compile the program, either just using: gcc coreRemove.c or gcc -o <whatever you want to name the executable> coreRemove.c
