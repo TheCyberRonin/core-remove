@@ -1,6 +1,6 @@
 /*********************************************************************************
  * Ruben Swyers                                                                  *
- * Accepts a directory as a command line argument					     *
+ * Accepts a directory as a command line argument					             *
  * it will search throught it and list directories							     *
  * and cores in them along with some information about them.					 *
  *********************************************************************************
@@ -81,14 +81,14 @@ void list_dir(char * name, int level)
         }
         //if it's not a directory its a file,looks to see if it is a core file, prints the location and removes it
         else
-        {	
+        {
         	if(strcmp("core",entry->d_name) == 0)
         	{
         		printf("%*sremoved: %s%20d bytes\n",offset,"",entry->d_name,(int)statS.st_size);
         		unlink(entry->d_name);
         		flag = 1;
         	}
-            
+
         }
     }
     if(flag == 0)
