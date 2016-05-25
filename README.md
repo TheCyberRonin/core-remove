@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/Rxswyers/core-remove.svg?branch=master)](https://travis-ci.org/Rxswyers/core-remove)
 Core Remove
 ===========
 Created by Ruben Swyers
