@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/Rxswyers/core-remove.svg?branch=master)](https://travis-ci.org/Rxswyers/core-remove) [![Github All Releases](https://img.shields.io/github/downloads/rxswyers/core-remove/total.svg?maxAge=2592000)]()
 Core Remove
 ===========
 Created by Ruben Swyers
