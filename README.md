@@ -1,6 +1,5 @@
 Core Remove
 ===========
-Created by Ruben Swyers
 
 Description
 ===========
